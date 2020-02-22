@@ -2,6 +2,8 @@ Base Skeleton to start your application using Flask-AppBuilder
 --------------------------------------------------------------
 Also check https://flask-appbuilder.readthedocs.io/en/latest/installation.html
 
+From https://github.com/dpgaspar/Flask-AppBuilder-Skeleton
+
 - Install it::
 
 	pip install flask-appbuilder
