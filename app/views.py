@@ -1,31 +1,30 @@
 from flask import render_template
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from flask_appbuilder import ModelView, ModelRestApi
+from flask_appbuilder import ModelView, MasterDetailView
 
-from app.models import ContactGroup, Contact
+from app.models import Dataset, Attribute, DataQualityRule
 from . import appbuilder, db
 
 
-class ContactModelView(ModelView):
-    datamodel = SQLAInterface(Contact)
+class AttributeView(ModelView):
+    datamodel = SQLAInterface(Attribute)
+    add_columns = ['dataset', 'name', 'rules']
+    edit_columns = ['name', 'rules']
+    show_columns = ['dataset', 'name']
+    list_columns = ['dataset', 'name']
 
-    label_columns = {'contact_group':'Contacts Group'}
-    list_columns = ['name','personal_cellphone','birthday','contact_group']
 
-    show_fieldsets = [
-        (
-            'Summary',
-            {'fields': ['name', 'address', 'contact_group']}
-        ),
-        (
-            'Personal Info',
-            {'fields': ['birthday', 'personal_phone', 'personal_cellphone'], 'expanded': False}
-        ),
-    ]
+class DataQualityRuleView(ModelView):
+    datamodel = SQLAInterface(DataQualityRule)
+    related_views = [AttributeView]
+    add_columns = ['name']
+    edit_columns = ['name']
+    show_columns = ['name']
+    list_columns = ['name']
 
-class GroupModelView(ModelView):
-    datamodel = SQLAInterface(ContactGroup)
-    related_views = [ContactModelView]
+class DataSetView(ModelView):
+    datamodel = SQLAInterface(Dataset)
+    related_views = [AttributeView]
 
 """
     Create your Model based REST API::
@@ -73,16 +72,24 @@ def page_not_found(e):
 db.create_all()
 
 appbuilder.add_view(
-    GroupModelView,
-    "List Groups",
+    DataSetView,
+    "Datasets",
     icon = "fa-folder-open-o",
-    category = "Contacts",
+    category = "Dataset",
     category_icon = "fa-envelope"
 )
+
 appbuilder.add_view(
-    ContactModelView,
-    "List Contacts",
+    AttributeView,
+    "Attributes",
     icon = "fa-envelope",
-    category = "Contacts"
+    category = "Dataset"
 )
 
+
+appbuilder.add_view(
+    DataQualityRuleView,
+    "Rules",
+    icon = "fa-envelope",
+    category = "Data Quality"
+)

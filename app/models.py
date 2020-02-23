@@ -1,5 +1,6 @@
+from dateutil.utils import today
 from flask_appbuilder import Model
-from sqlalchemy import Column, Integer, String, ForeignKey, Date
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Boolean, Table
 from sqlalchemy.orm import relationship
 
 """
@@ -11,22 +12,33 @@ AuditMixin will add automatic timestamp of created and modified by who
 
 """
 
-class ContactGroup(Model):
+class Dataset(Model):
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique = True, nullable=False)
+    name = Column(String(50), unique = False, nullable=False)
 
     def __repr__(self):
         return self.name
 
-class Contact(Model):
+
+class DataQualityRule(Model):
+    id = Column(Integer, primary_key=True)
+    name = Column(String(150), unique=True, nullable=False)
+
+    def __repr__(self):
+        return self.name
+
+assoc_attribute_rule = Table('attribute_rule', Model.metadata, Column('id', Integer, primary_key=True),
+                             Column('attribute_id', Integer, ForeignKey('attribute.id')),
+                             Column('rule_id', Integer, ForeignKey('data_quality_rule.id'))
+        )
+
+
+class Attribute(Model):
     id = Column(Integer, primary_key=True)
     name =  Column(String(150), unique = True, nullable=False)
-    address =  Column(String(564), default='Street ')
-    birthday = Column(Date)
-    personal_phone = Column(String(20))
-    personal_cellphone = Column(String(20))
-    contact_group_id = Column(Integer, ForeignKey('contact_group.id'))
-    contact_group = relationship("ContactGroup")
+    rules = relationship('DataQualityRule', secondary=assoc_attribute_rule, backref='attribute')
+    dataset_id = Column(Integer, ForeignKey('dataset.id'), nullable=False)
+    dataset = relationship("Dataset")
 
     def __repr__(self):
         return self.name
