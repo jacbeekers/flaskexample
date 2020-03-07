@@ -6,16 +6,50 @@ from flask_appbuilder.security.manager import (
     AUTH_LDAP,
     AUTH_OAUTH,
 )
+from encryption import Encryption
+import json
 
+"""
+    secret from siteKey
+"""
+SECRET_KEY = Encryption().get_key()
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Your App secret key
-SECRET_KEY = "\2\1thisismyscretkey\1\2\e\y\y\h"
+SQLALCHEMY_TRACK_MODIFICATIONS = 'False'
+
+
+class Config:
+    """
+        Read configuration file
+    """
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    config_dir = basedir + "/config"
+
+    def __init__(self):
+        self.config_dir = self.config_dir + "/"
+
+    def read_properties(self, config_file):
+        with open(self.config_dir + config_file) as lines:
+            properties = json.load(lines)
+        return properties
+
+# get database connectivity
+properties = Config().read_properties("database.json")
+
+database_uri_prefix = properties["database_uri_prefix"]
+user = properties["user"]
+pwd = properties["pwd"]
+pwd = Encryption().decrypt(pwd.encode())
+hostname = properties["hostname"]
+port = properties["port"]
+service_name = properties["service_name"]
+print("hostname: " + hostname + " - port: " + port + " - user: " + user + " - service_name: " + service_name)
 
 # The SQLAlchemy connection string.
-SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "app.db")
+# SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, "app.db")
 # SQLALCHEMY_DATABASE_URI = 'mysql://myapp@localhost/myapp'
 # SQLALCHEMY_DATABASE_URI = 'postgresql://root:password@localhost/myapp'
+SQLALCHEMY_DATABASE_URI = database_uri_prefix + user + ":" + pwd + "@" + hostname + ":" + port + "/" + service_name
 
 # Flask-WTF flag for CSRF
 CSRF_ENABLED = True
@@ -35,7 +69,7 @@ APP_NAME = "Data Quality"
 # The authentication type
 # AUTH_OID : Is for OpenID
 # AUTH_DB : Is for database (username/password()
-# AUTH_LDAP : Is for LDAP
+# AUTH_LDAP #: Is for LDAP
 # AUTH_REMOTE_USER : Is for using REMOTE_USER from web server
 AUTH_TYPE = AUTH_DB
 
@@ -52,7 +86,7 @@ AUTH_TYPE = AUTH_DB
 # AUTH_USER_REGISTRATION_ROLE = "Public"
 
 # When using LDAP Auth, setup the ldap server
-# AUTH_LDAP_SERVER = "ldap://ldapserver.new"
+# AUTH_LDAP_SERVER = "ldap://solon.prd"
 
 # Uncomment to setup OpenID providers example for OpenID authentication
 # OPENID_PROVIDERS = [
@@ -70,14 +104,14 @@ BABEL_DEFAULT_FOLDER = "translations"
 # The allowed translation for you app
 LANGUAGES = {
     "en": {"flag": "gb", "name": "English"},
-#    "pt": {"flag": "pt", "name": "Portuguese"},
+    #    "pt": {"flag": "pt", "name": "Portuguese"},
     "pt_BR": {"flag": "br", "name": "Pt Brazil"},
-#    "es": {"flag": "es", "name": "Spanish"},
+    #    "es": {"flag": "es", "name": "Spanish"},
     "de": {"flag": "de", "name": "German"},
-#    "zh": {"flag": "cn", "name": "Chinese"},
-#    "ru": {"flag": "ru", "name": "Russian"},
-#    "pl": {"flag": "pl", "name": "Polish"},
-#    "nl": {"flag": "nl", "name": "Dutch"},
+    #    "zh": {"flag": "cn", "name": "Chinese"},
+    #    "ru": {"flag": "ru", "name": "Russian"},
+    #    "pl": {"flag": "pl", "name": "Polish"},
+    #    "nl": {"flag": "nl", "name": "Dutch"},
 }
 # ---------------------------------------------------
 # Image and file configuration
@@ -96,12 +130,12 @@ IMG_UPLOAD_URL = "/static/uploads/"
 # Theme configuration
 # these are located on static/appbuilder/css/themes
 # you can create your own and easily use them placing them on the same dir structure to override
-APP_THEME = ""
-#APP_THEME = "bootstrap-theme.css"  # default bootstrap
+# APP_THEME = ""
+# APP_THEME = "bootstrap-theme.css"  # default bootstrap
 # APP_THEME = "cerulean.css"
 # APP_THEME = "amelia.css"
 # APP_THEME = "cosmo.css"
-# APP_THEME = "cyborg.css"
+APP_THEME = "cyborg.css"
 # APP_THEME = "flatly.css"
 # APP_THEME = "journal.css"
 # APP_THEME = "readable.css"

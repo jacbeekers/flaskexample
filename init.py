@@ -6,10 +6,8 @@ from flask_appbuilder import SQLA, AppBuilder
 app = Flask(__name__)
 
 # Basic config with security for forms and session cookie
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'app.db')
-app.config['CSRF_ENABLED'] = True
-app.config['SECRET_KEY'] = 'f8zz8bzDQ(bzfdvtare|TV;tz'
 
 # Init SQLAlchemy
 db = SQLA(app)
